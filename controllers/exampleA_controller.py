@@ -1,43 +1,37 @@
 from my_framework.my_http.base_controller import BaseController
 from my_framework.my_http.http_data_types import HttpResponse
+from verify_signature import verify_signature
 from dtos.message import Message
+from config import ACTION, SECRET_TOKEN
+
+import json
 
 class ExampleAController(BaseController):
     def __init__(self):
-        base_path="/ExampleA"
+        base_path="/GITWebhooks"
         super().__init__(base_path)
         
-        self.methods_dict["get_world"] += "/world"
-        self.methods_dict["post_world_simple"] += "/world"
-        self.methods_dict["post_world"] += "/world/path_variable/{name}"
-        self.methods_dict["put_query_param"] += "/world/query"
-        self.methods_dict["delete_body"] += "/world/body"
+        self.methods_dict["post_update"] += "/update"
 
-    def get_world(self, http_request):
-        body = Message("Hello world!")
-        response = HttpResponse(200, {}, body)
-        return response
+    def post_update(self, http_request):        
+        body = http_request.body
+
+        if "X-Hub-Signature-256" not in http_request.headers:
+            return HttpResponse(403, {}, Message("X-Hub-Signature-256 header is missing!"))
+
+        if verify_signature(body, SECRET_TOKEN, http_request.headers["X-Hub-Signature-256"]) is False:
+            return HttpResponse(403, {}, Message("Request signatures didn't match!"))
 
 
-    def post_world_simple(self, http_request):
-        body = Message("Hello world but with POST!")
-        response = HttpResponse(200, {}, body)
-        return response
+        body = json.loads(body)
 
-    def post_world(self, http_request):
-        name = self.get_path_variables(http_request)["name"]
-        body = Message(f"Hello {name}! I'm using path variables!")
-        response = HttpResponse(200, {}, body)
-        return response
+        action = body["action"]
+        merged = body["pull_request"]["merged"]
+        ref = body["pull_request"]["base"]["ref"]
 
-    def put_query_param(self, http_request):
-        name = self.get_query_param(http_request)["name"]
-        body = Message(f"Hello {name}! I'm using query parameters!")
-        response = HttpResponse(200, {}, body)
-        return response
-
-    def delete_body(self, http_request):
-        name = Message(http_request.body)
-        body = Message(f"Hello {name.message}! I'm using body!")
-        response = HttpResponse(200, {}, body)
+        if action == "closed" and merged == True and (ref == "main" or ref == "master"):
+            ACTION()
+        
+        response_body = ""
+        response = HttpResponse(200, {}, response_body)
         return response
