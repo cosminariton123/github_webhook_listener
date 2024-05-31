@@ -34,6 +34,9 @@ PRODUCTION = False
 
 SECRET_TOKEN = "mySecureGitHubSecretToken"
 
+def ACTION():  
+{TAB}print("Hello World, a pull request has been merged and closed on master/main")
+
 #### Examples non Raspberry Pi Pico W
 
 PORT = 1234  
@@ -41,10 +44,12 @@ SSID = ""
 WLAN_KEY = ""  
 PRODUCTION = False
 
+SECRET_TOKEN = "mySecureGitHubSecretToken"
+
 def ACTION():  
 {TAB}print("Hello World, a pull request has been merged and closed on master/main")
 
-### Controllers
+### Implement your own hooks
 
-Create controller files or edit the existing ones in controllers directory.  
-The structure and implementations should be simillar to the examples provided in controllers directory.
+Edit the file in "controllers" directory to change to logic or to add more hooks.  
+Creation of another controller file is also supported.
