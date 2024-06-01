@@ -6,7 +6,7 @@ from config import ACTION, SECRET_TOKEN
 
 import json
 
-class ExampleAController(BaseController):
+class GITWebhooksController(BaseController):
     def __init__(self):
         base_path="/GITWebhooks"
         super().__init__(base_path)
